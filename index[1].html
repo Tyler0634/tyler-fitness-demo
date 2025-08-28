@@ -1,0 +1,307 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Tyler Fitness — Demo</title>
+  <style>
+    :root {
+      --brand: #10b981;       /* emerald */
+      --brand-700: #059669;   /* darker emerald */
+      --bg: #f8fafc; --text:#0f172a; --muted:#64748b; --card:#ffffff;
+      --ring:#e2e8f0; --shadow: 0 8px 24px rgba(15,23,42,0.06);
+    }
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    .container{max-width:1200px;margin:0 auto;padding:24px}
+    .grid{display:grid;gap:24px}
+    .col-3{grid-template-columns:repeat(12, minmax(0,1fr))}
+    .sidebar{grid-column:span 12}@media(min-width:1024px){.sidebar{grid-column:span 2}}
+    .main{grid-column:span 12}@media(min-width:1024px){.main{grid-column:span 7}}
+    .chat{grid-column:span 12}@media(min-width:1024px){.chat{grid-column:span 3}}
+    .card{background:var(--card);border:1px solid var(--ring);border-radius:16px;box-shadow:var(--shadow)}
+    .p-4{padding:16px}.p-6{padding:24px}.mb-2{margin-bottom:8px}.mb-3{margin-bottom:12px}.mb-4{margin-bottom:16px}.mt-3{margin-top:12px}.mt-4{margin-top:16px}.mt-6{margin-top:24px}
+    .title{font-weight:800;font-size:24px}.muted{color:var(--muted);font-size:12px}
+    .stat{border:1px solid var(--ring);border-radius:12px;padding:16px}
+    .stat .label{font-size:12px;color:var(--muted)} .stat .value{margin-top:8px;font-size:22px;font-weight:700}
+    .btn{border:0;border-radius:12px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer}
+    .btn-brand{background:var(--brand);color:white} .btn-outline{background:white;border:1px solid var(--ring)}
+    .flex{display:flex;align-items:center;justify-content:space-between}
+    .badge{font-size:11px;color:var(--muted)}
+    .chip{display:inline-block;background:#ecfdf5;color:#065f46;border-radius:999px;padding:2px 8px;font-size:11px}
+    .schedule{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+    .day{background:#fff;border:1px solid var(--ring);border-radius:12px;padding:12px}
+    .day h4{margin:0 0 8px 0;font-size:12px;color:#475569}
+    .row{border:1px solid var(--ring);border-radius:10px;padding:8px}
+    .row .name{font-weight:600}
+    .row .meta{font-size:12px;color:#64748b}
+    .msgs{max-height:52vh;overflow:auto;padding-right:6px}
+    .bubble{display:inline-block;padding:8px 12px;border-radius:16px;font-size:13px;box-shadow:var(--shadow);max-width:85%}
+    .right{text-align:right}.left{text-align:left}
+    .bubble.user{background:var(--brand);color:white}.bubble.assistant{background:#f1f5f9;color:#0f172a}
+    input[type=text]{width:100%;border:1px solid var(--ring);border-radius:12px;padding:10px 12px;font-size:14px}
+    .brand-gradient{background:linear-gradient(135deg,#0f172a, var(--brand-700));color:#fff}
+    .logo{height:40px;width:40px;border-radius:999px;background:rgba(255,255,255,0.14);display:grid;place-items:center;font-weight:800}
+    .brand-controls{position:fixed;bottom:16px;right:16px;z-index:20}
+    .panel{position:fixed;right:16px;bottom:68px;width:320px;background:white;border:1px solid var(--ring);border-radius:16px;box-shadow:var(--shadow);padding:12px;display:none}
+    .panel.open{display:block}
+    .row-input{display:flex;gap:8px;align-items:center;margin-top:8px}
+    .row-input input[type=color]{width:44px;height:32px;border:none;background:none}
+    .footer{margin-top:16px;font-size:12px;color:#64748b}
+    a{color:var(--brand)}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="grid col-3">
+      <aside class="sidebar">
+        <div class="card p-6 brand-gradient">
+          <div class="flex">
+            <div style="display:flex;align-items:center;gap:12px">
+              <img id="brandLogo" alt="" style="display:none;height:40px;width:40px;border-radius:999px;object-fit:cover;border:1px solid rgba(255,255,255,0.2)">
+              <div id="brandInitials" class="logo">TF</div>
+              <div>
+                <div id="brandName" style="font-weight:700">Tyler Fitness</div>
+                <div class="muted" style="color:#cbd5e1">Owner Console</div>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4">
+            <div style="font-size:13px;opacity:.95">AI Assistant</div>
+            <div style="font-size:13px;opacity:.8">Schedule</div>
+            <div style="font-size:13px;opacity:.8">Trainers</div>
+            <div style="font-size:13px;opacity:.8">Memberships</div>
+            <div style="font-size:13px;opacity:.8">Reports</div>
+          </div>
+        </div>
+      </aside>
+      <main class="main">
+        <div class="card p-6">
+          <div class="flex">
+            <div>
+              <div class="title">Welcome back — <span id="brandNameTitle">Tyler Fitness</span> Dashboard</div>
+              <div class="muted">Quick snapshot of this studio's activity.</div>
+            </div>
+            <div>
+              <button class="btn btn-outline" onclick="navigator.clipboard.writeText(location.href).then(()=>alert('URL copied — share this link.'))">Share</button>
+              <button class="btn btn-brand" onclick="newClass()">New Class</button>
+            </div>
+          </div>
+          <div class="mt-4" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+            <div class="stat"><div class="label">Members</div><div class="value" id="statMembers">312</div></div>
+            <div class="stat"><div class="label">Classes this week</div><div class="value" id="statClasses">0</div></div>
+            <div class="stat"><div class="label">Revenue</div><div class="value">$4,230</div></div>
+          </div>
+          <div class="mt-4">
+            <div style="font-weight:700">Weekly Schedule</div>
+            <div class="mt-3 schedule" id="schedule"></div>
+          </div>
+          <div class="footer">
+            Tip: Tweak branding via the floating paintbrush ➜ (persists in your browser). Use URL params like
+            <code>?brand=Tyler%20Fitness&color=%2310b981</code> to preconfigure.
+          </div>
+        </div>
+      </main>
+      <aside class="chat">
+        <div class="card p-4">
+          <div class="flex">
+            <div>
+              <div style="font-weight:700">AI Assistant</div>
+              <div class="muted">Ask to configure classes, trainers, or memberships.</div>
+            </div>
+            <div class="chip">Static Demo</div>
+          </div>
+          <div class="msgs mt-3" id="msgs"></div>
+          <form id="form" class="mt-3">
+            <div style="display:flex;gap:8px;">
+              <input id="input" type="text" placeholder="e.g., add a class Boxing at 6:00 am on mondays capacity 18 price $30" />
+              <button class="btn btn-brand" type="submit">Send</button>
+            </div>
+          </form>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Brand Controls -->
+  <div class="brand-controls">
+    <button id="brandBtn" class="btn btn-brand" title="Brand settings">🎨</button>
+    <div id="brandPanel" class="panel">
+      <div style="font-weight:700">Brand Settings</div>
+      <div class="row-input">
+        <label style="width:90px">Name</label>
+        <input id="brandInput" type="text" placeholder="Your Brand" style="flex:1;border:1px solid var(--ring);border-radius:10px;padding:8px 10px" />
+      </div>
+      <div class="row-input">
+        <label style="width:90px">Color</label>
+        <input id="brandColor" type="color" value="#10b981" />
+        <input id="brandColor2" type="color" value="#059669" />
+      </div>
+      <div class="row-input">
+        <label style="width:90px">Logo</label>
+        <input id="brandLogoFile" type="file" accept="image/*" />
+      </div>
+      <div class="row-input">
+        <button class="btn btn-brand" onclick="saveBrand()">Save</button>
+        <button class="btn btn-outline" onclick="resetBrand()">Reset</button>
+      </div>
+      <div class="muted" style="margin-top:8px">Hint: You can also set <code>?brand=Acme&color=%2310b981</code> in the URL.</div>
+    </div>
+  </div>
+
+  <script>
+    // --- Data ---
+    const trainers = [{ id: id(), name: 'Sam' }, { id: id(), name: 'Jordan' }];
+    const classes = [
+      { id: id(), name: 'HIIT', day: 'Mon', time: '6:00 am', trainer: 'Sam', capacity: 18, price: 30 },
+      { id: id(), name: 'Strength', day: 'Wed', time: '7:00 am', trainer: 'Jordan', capacity: 16, price: 32 }
+    ];
+
+    // --- Helpers ---
+    function id(){ return Math.random().toString(36).slice(2,9) }
+    function titleCase(s){ return s.replace(/\w\S*/g, t => t[0].toUpperCase()+t.slice(1).toLowerCase()) }
+    function initials(name){ return name.split(/\s+/).map(p=>p[0]||'').join('').slice(0,2).toUpperCase() }
+    function setVar(name, val){ document.documentElement.style.setProperty(name, val) }
+
+    // --- Schedule render ---
+    function renderSchedule(){
+      const el = document.getElementById('schedule');
+      const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+      el.innerHTML = days.map(d => {
+        const items = classes.filter(c => c.day === d);
+        return `<div class="day"><h4>${d}</h4>${
+          items.length ? items.map(c => `
+            <div class="row"><div class="name">${c.name}</div><div class="meta">${c.time} • ${c.trainer||'-'} • Cap ${c.capacity||'-'} • $${c.price||'-'}</div></div>
+          `).join('') : `<div class="muted">—</div>`
+        }</div>`
+      }).join('');
+      document.getElementById('statClasses').textContent = String(classes.length);
+    }
+
+    // --- Chat ---
+    function pushMsg(role, text){
+      const box = document.getElementById('msgs');
+      const bubble = document.createElement('div');
+      bubble.className = role === 'user' ? 'right' : 'left';
+      bubble.innerHTML = `<div class="bubble ${role}">${text}</div>`;
+      box.appendChild(bubble);
+      box.scrollTop = box.scrollHeight;
+    }
+    function intent(text){
+      const t = text.toLowerCase().trim();
+      if(!t) return { type:'UNKNOWN' };
+      if(/^(help|what can you do\??)/.test(t)) return { type:'HELP' };
+      if(/^(show|list).*(schedule|classes)/.test(t)) return { type:'LIST_CLASSES' };
+      if(/^(add|create) (a )?class /.test(t)){
+        const name = titleCase((t.match(/class\s+([a-z0-9\-\s]+)/)||[])[1]||'New Class');
+        const time = ((t.match(/\bat\s+([0-9:apm\s]+)/)||[])[1]||'6:00 am').trim();
+        const day = ((t.match(/\bon\s+([a-z]+)/)||[])[1]||'mon').slice(0,3);
+        const cap = Number(((t.match(/capacity\s+(\d+)/)||[])[1])||16);
+        const price = Number(((t.match(/price\s+\$?(\d+(?:\.\d+)?)/)||[])[1])||30);
+        const trainer = titleCase(((t.match(/trainer\s+([a-z\s]+)/)||[])[1]||''));
+        return { type:'ADD_CLASS', payload:{ name, time, day: titleCase(day.slice(0,3)), capacity:cap, price, trainer } };
+      }
+      return { type:'UNKNOWN' };
+    }
+
+    // --- Branding controls ---
+    const btn = document.getElementById('brandBtn');
+    const panel = document.getElementById('brandPanel');
+    btn.addEventListener('click', ()=> panel.classList.toggle('open'));
+
+    function applyBrand({name,color,color2,logoUrl}){
+      const n = name || 'Tyler Fitness';
+      document.getElementById('brandName').textContent = n;
+      document.getElementById('brandNameTitle').textContent = n;
+      document.title = n + ' — Demo';
+      document.getElementById('brandInitials').textContent = initials(n);
+
+      if(color) setVar('--brand', color);
+      if(color2) setVar('--brand-700', color2 || color);
+
+      const img = document.getElementById('brandLogo');
+      const init = document.getElementById('brandInitials');
+      if(logoUrl){
+        img.src = logoUrl; img.style.display = 'block'; init.style.display='none';
+      } else {
+        img.style.display = 'none'; init.style.display='grid';
+      }
+    }
+
+    function saveBrand(){
+      const name = document.getElementById('brandInput').value.trim();
+      const color = document.getElementById('brandColor').value;
+      const color2 = document.getElementById('brandColor2').value;
+      const file = document.getElementById('brandLogoFile').files[0];
+      if(file){
+        const rd = new FileReader();
+        rd.onload = () => {
+          const logoUrl = rd.result;
+          const cfg = { name, color, color2, logoUrl };
+          localStorage.setItem('brandCfg', JSON.stringify(cfg));
+          applyBrand(cfg);
+        };
+        rd.readAsDataURL(file);
+      } else {
+        const cfg = { name, color, color2 };
+        localStorage.setItem('brandCfg', JSON.stringify(cfg));
+        applyBrand(cfg);
+      }
+    }
+
+    function resetBrand(){
+      localStorage.removeItem('brandCfg');
+      applyBrand({ name:'Tyler Fitness', color:'#10b981', color2:'#059669', logoUrl:null });
+    }
+
+    // URL params support: ?brand=Acme&color=%2310b981&logo=...
+    const params = new URLSearchParams(location.search);
+    const urlBrand = params.get('brand');
+    const urlColor = params.get('color');
+    const urlColor2 = params.get('color2');
+    const urlLogo = params.get('logo');
+
+    // Load from localStorage or URL or defaults
+    const saved = (()=>{ try { return JSON.parse(localStorage.getItem('brandCfg')||'null') } catch { return null } })();
+    applyBrand(saved || { name: urlBrand || 'Tyler Fitness', color: urlColor || '#10b981', color2: urlColor2 || '#059669', logoUrl: urlLogo });
+
+    // Prefill controls
+    (document.getElementById('brandInput')).value = (saved?.name || urlBrand || 'Tyler Fitness');
+    (document.getElementById('brandColor')).value = (saved?.color || urlColor || '#10b981');
+    (document.getElementById('brandColor2')).value = (saved?.color2 || urlColor2 || '#059669');
+
+    // --- Init content ---
+    renderSchedule();
+    pushMsg('assistant', "Welcome to the Tyler Fitness demo. Try: ‘add a class Boxing at 6:00 am on mondays capacity 18 price $30’. Use the 🎨 button to tweak branding.");
+    document.getElementById('form').addEventListener('submit', e => {
+      e.preventDefault();
+      const input = document.getElementById('input');
+      const q = input.value.trim();
+      if(!q) return;
+      pushMsg('user', q);
+      input.value = '';
+      const i = intent(q);
+      if(i.type === 'HELP'){
+        pushMsg('assistant', 'I can add/list classes. (Static demo — changes live only in your browser)');
+      } else if(i.type === 'LIST_CLASSES'){
+        const txt = classes.map(c => `${c.day} ${c.time} – ${c.name}`).join('\n') || 'No classes yet.';
+        pushMsg('assistant', txt);
+      } else if(i.type === 'ADD_CLASS'){
+        const p = i.payload;
+        classes.push({ id:id(), name:p.name, day:p.day, time:p.time, trainer:p.trainer, capacity:p.capacity, price:p.price });
+        renderSchedule();
+        pushMsg('assistant', `Added ${p.name} on ${p.day} at ${p.time}${p.trainer?` with ${p.trainer}`:''} (cap ${p.capacity}, $${p.price}).`);
+      } else {
+        pushMsg('assistant', "Sorry, I didn't catch that. Try ‘help’.");
+      }
+    });
+
+    function newClass(){
+      const name = prompt('Class name?', 'Boxing');
+      if(!name) return;
+      classes.push({ id:id(), name, day:'Mon', time:'6:00 am', trainer:'Sam', capacity:16, price:30 });
+      renderSchedule();
+    }
+  </script>
+</body>
+</html>
